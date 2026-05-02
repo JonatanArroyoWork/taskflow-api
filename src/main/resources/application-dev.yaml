@@ -1,11 +1,7 @@
-spring:
-  application:
-    name: taskflow-api
-
-server:
-  port: 8080
+app:
+  env: dev
 
 logging:
   level:
-    root: INFO
-    com.example.demo: DEBUG
+    root: DEBUG
+    com.jam.taskflow: DEBUG
