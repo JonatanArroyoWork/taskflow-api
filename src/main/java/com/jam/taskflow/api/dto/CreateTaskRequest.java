@@ -1,6 +1,7 @@
 package com.jam.taskflow.api.dto;
 
 import com.jam.taskflow.domain.model.TaskPriority;
+import com.jam.taskflow.domain.model.TaskStatus;
 import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,9 @@ public class CreateTaskRequest {
     private TaskPriority priority;
 
     private LocalDateTime dueDate;
+
+    private TaskStatus status;
+
 
     public CreateTaskRequest() {
     }
@@ -49,5 +53,13 @@ public class CreateTaskRequest {
 
     public void setDueDate(LocalDateTime dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public TaskStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TaskStatus status) {
+        this.status = status;
     }
 }

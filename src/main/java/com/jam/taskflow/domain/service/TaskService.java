@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import com.jam.taskflow.api.dto.CreateTaskRequest;
 import com.jam.taskflow.api.dto.UpdateTaskRequest;
 import com.jam.taskflow.api.dto.TaskResponse;
+import com.jam.taskflow.api.mappers.TaskMapper;
 import com.jam.taskflow.domain.model.Task;
 import com.jam.taskflow.domain.model.TaskStatus;
 import com.jam.taskflow.persistence.repository.TaskRepository;
@@ -19,34 +20,31 @@ import com.jam.taskflow.persistence.repository.TaskRepository;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final TaskMapper taskMapper;
 
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper) {
         this.taskRepository = taskRepository;
+        this.taskMapper = taskMapper;
     }
 
     public List<TaskResponse> getAllTasks() {
         return taskRepository.findAll().stream()
-                             .map(this::toResponse)
+                             .map(taskMapper::mapTaskToTaskResponse)
                              .collect(Collectors.toList());
     }
 
     public TaskResponse getTaskById(UUID id) {
         Task task = taskRepository.findById(id)
                                   .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarea no encontrada"));
-        return toResponse(task);
+        return taskMapper.mapTaskToTaskResponse(task);
     }
 
     @Transactional
     public TaskResponse createTask(CreateTaskRequest request) {
-        Task task = new Task();
-        task.setTitle(request.getTitle());
-        task.setDescription(request.getDescription());
-        task.setPriority(request.getPriority());
-        task.setDueDate(request.getDueDate());
+        Task task = taskMapper.mapCreateTaskResquestToTask(request);
         task.setStatus(TaskStatus.PENDING);
-
         Task savedTask = taskRepository.save(task);
-        return toResponse(savedTask);
+        return taskMapper.mapTaskToTaskResponse(savedTask);
     }
 
     @Transactional
@@ -61,7 +59,7 @@ public class TaskService {
         if (request.getStatus() != null) task.setStatus(request.getStatus());
 
         Task updatedTask = taskRepository.save(task);
-        return toResponse(updatedTask);
+        return taskMapper.mapTaskToTaskResponse(updatedTask);
     }
 
     @Transactional
@@ -70,18 +68,5 @@ public class TaskService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarea no encontrada");
         }
         taskRepository.deleteById(id);
-    }
-
-    private TaskResponse toResponse(Task task) {
-        TaskResponse response = new TaskResponse();
-        response.setId(task.getId());
-        response.setTitle(task.getTitle());
-        response.setDescription(task.getDescription());
-        response.setStatus(task.getStatus());
-        response.setPriority(task.getPriority());
-        response.setDueDate(task.getDueDate());
-        response.setCreatedAt(task.getCreatedAt());
-        response.setUpdatedAt(task.getUpdatedAt());
-        return response;
     }
 }
